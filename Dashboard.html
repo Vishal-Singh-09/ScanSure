@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Temp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        
+        .text-gradient { 
+            background: linear-gradient(to right, #f43f5e, #9333ea); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        
+        .upload-zone {
+            border: 2px dashed #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #000;
+            background-color: #f9fafb;
+        }
+        
+        .image-card {
+            aspect-ratio: 1;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .image-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .scan-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #10b981, transparent);
+            animation: scan 2s linear infinite;
+            box-shadow: 0 0 10px #10b981;
+        }
+        
+        .chat-message {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+        .processing-ring {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes danger-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+        }
+        .danger-alert {
+            animation: danger-pulse 2s infinite;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        
+        .filename-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 10px;
+            padding: 4px 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen flex flex-col overflow-hidden">
+
+    <!-- Critical Alert for Fake Product (Hidden by default) -->
+    <div id="criticalAlert" class="hidden fixed top-24 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-2xl px-4">
+        <div class="danger-alert bg-red-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+                <i class="fas fa-exclamation-triangle text-2xl"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-bold text-lg">COUNTERFEIT PRODUCT DETECTED</h3>
+                <p class="text-sm text-red-100">Do not use this product. It may contain harmful chemicals.</p>
+            </div>
+            <button onclick="document.getElementById('criticalAlert').classList.add('hidden')" class="text-white/80 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shrink-0 z-20">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                <i class="fas fa-sparkles text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Temp</h1>
+                <p class="text-xs text-gray-500">AI Cosmetic Authenticator</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <div class="hidden md:flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                AI Online
+            </div>
+            <button class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors relative">
+                <i class="fas fa-bell text-gray-600"></i>
+                <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition-transform">
+                JD
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Sidebar - Upload Area -->
+        <aside class="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col shrink-0 overflow-y-auto custom-scrollbar">
+            <div class="p-6 border-b border-gray-100">
+                <h2 class="text-lg font-bold mb-1">Upload Images</h2>
+                <p class="text-sm text-gray-500">Upload up to 5 images for AI verification</p>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <!-- Upload Zone -->
+                <div id="uploadZone" class="upload-zone rounded-2xl p-8 text-center cursor-pointer bg-gray-50">
+                    <input type="file" id="fileInput" class="hidden" multiple accept="image/*" max="5">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-gray-400"></i>
+                    </div>
+                    <p class="text-sm font-medium text-gray-900 mb-1">Click to upload or drag & drop</p>
+                    <p class="text-xs text-gray-500">PNG, JPG up to 5MB each</p>
+                </div>
+
+                <!-- Quick Tips -->
+                <div class="bg-blue-50 rounded-xl p-4">
+                    <h3 class="text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">
+                        <i class="fas fa-lightbulb text-blue-600"></i>
+                        Tips for best results
+                    </h3>
+                    <ul class="text-xs text-blue-800 space-y-1.5 list-disc list-inside">
+                        <li>Capture packaging front & back</li>
+                        <li>Include batch code clearly</li>
+                        <li>Ensure good lighting</li>
+                        <li>Show hologram/security seal</li>
+                    </ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-3 pt-4 border-t border-gray-100">
+                    <button id="analyzeBtn" onclick="startAnalysis()" class="w-full bg-black text-white font-semibold py-3.5 rounded-xl hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-search"></i>
+                        Analyze Product
+                    </button>
+                    <button onclick="clearAll()" class="w-full bg-white border-2 border-gray-200 text-gray-700 font-medium py-3.5 rounded-xl hover:border-gray-400 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-trash"></i>
+                        Clear All
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 flex flex-col bg-gray-50/50 overflow-hidden relative">
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="absolute inset-0 flex items-center justify-center">
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-camera text-3xl text-gray-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Ready to verify</h3>
+                    <p class="text-gray-500 mb-6">Upload product images to start AI analysis</p>
+                    <button onclick="document.getElementById('fileInput').click()" class="bg-black text-white px-6 py-3 rounded-full font-medium hover:bg-gray-800 transition-colors">
+                        Upload Images
+                    </button>
+                </div>
+            </div>
+
+            <!-- Image Grid (Hidden initially) -->
+            <div id="imageGrid" class="hidden flex-1 overflow-y-auto custom-scrollbar p-6">
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto" id="gridContainer">
+                    <!-- Images will be inserted here dynamically -->
+                </div>
+
+                <!-- Analysis Status Overlay -->
+                <div id="analysisStatus" class="hidden mt-8 max-w-4xl mx-auto bg-white rounded-2xl p-6 border border-gray-200 shadow-lg">
+                    <div class="flex items-center gap-4">
+                        <div class="relative w-12 h-12">
+                            <div class="absolute inset-0 bg-black rounded-full opacity-20 processing-ring"></div>
+                            <div class="relative w-full h-full bg-black rounded-full flex items-center justify-center">
+                                <i class="fas fa-microscope text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg">Analyzing your product...</h3>
+                            <p class="text-sm text-gray-500">Checking packaging, batch codes, and authenticity markers</p>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-900" id="progressPercent">0%</div>
+                    </div>
+                    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+                        <div id="progressBar" class="bg-black h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <span class="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-600">Packaging ✓</span>
+                        <span class="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-600">Batch Code ✓</span>
+                        <span class="px-3 py-1 bg-blue-50 rounded-full text-xs font-medium text-blue-600 animate-pulse">Hologram...</span>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div id="resultsPanel" class="hidden mt-8 max-w-4xl mx-auto space-y-6">
+                    
+                    <!-- Main Verdict Card -->
+                    <div id="verdictCard" class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                        <div class="flex items-center gap-6">
+                            <div class="relative w-24 h-24 flex items-center justify-center shrink-0">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                    <path class="text-gray-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"/>
+                                    <path id="scoreCircle" class="text-green-500" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"/>
+                                </svg>
+                                <span id="scoreText" class="absolute text-xl font-bold text-green-600">0%</span>
+                            </div>
+                            <div class="flex-1">
+                                <div id="verdictBadge" class="flex items-center gap-2 text-green-600 font-bold text-lg mb-1">
+                                    <i class="fas fa-check-circle text-2xl"></i>
+                                    <span>Authentic Product</span>
+                                </div>
+                                <p id="verdictDesc" class="text-gray-600">This product appears to be genuine based on our analysis.</p>
+                            </div>
+                            <div id="safetyBadge" class="hidden px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-bold">
+                                <i class="fas fa-skull-crossbones mr-2"></i>DO NOT USE
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Findings -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-clipboard-check text-gray-600"></i>
+                                Key Findings
+                            </h3>
+                            <div id="findingsList" class="space-y-3">
+                                <!-- Dynamic content -->
+                            </div>
+                        </div>
+
+                        <div id="actionCard" class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-shield-alt text-gray-600"></i>
+                                Safety & Next Steps
+                            </h3>
+                            <div id="actionContent" class="space-y-4">
+                                <!-- Dynamic content -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Chat Bar -->
+            <div class="bg-white border-t border-gray-200 p-4 shrink-0">
+                <div class="max-w-4xl mx-auto">
+                    <div id="chatArea" class="h-48 overflow-y-auto custom-scrollbar mb-4 space-y-3 hidden">
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center shrink-0">
+                                <i class="fas fa-robot text-white text-xs"></i>
+                            </div>
+                            <div class="chat-message bg-gray-100 rounded-2xl rounded-tl-none px-4 py-3 max-w-[80%]">
+                                <p class="text-sm text-gray-800">Hi! I'm your AI assistant. Upload images and I'll help verify if your cosmetic product is authentic.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative flex items-center gap-3">
+                        <button class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors shrink-0">
+                            <i class="fas fa-paperclip text-gray-600"></i>
+                        </button>
+                        <div class="flex-1 relative">
+                            <input 
+                                type="text" 
+                                id="chatInput"
+                                placeholder="Ask about your results or type a message..."
+                                class="w-full pl-4 pr-12 py-3 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-black/10 focus:bg-white transition-all"
+                            >
+                            <button onclick="sendMessage()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
+                                <i class="fas fa-paper-plane text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <p class="text-center text-xs text-gray-400 mt-2">
+                        <i class="fas fa-shield-alt mr-1"></i>
+                        AI Assistant can make mistakes. Always verify with the brand for final confirmation.
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let uploadedImages = [];
+        const maxImages = 5;
+
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const imageGrid = document.getElementById('imageGrid');
+        const emptyState = document.getElementById('emptyState');
+        const chatArea = document.getElementById('chatArea');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            const remainingSlots = maxImages - uploadedImages.length;
+            const filesToProcess = Array.from(files).slice(0, remainingSlots);
+            
+            if (filesToProcess.length === 0) {
+                alert('Maximum 5 images allowed');
+                return;
+            }
+
+            filesToProcess.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        addImagePreview(e.target.result, file.name);
+                    };
+                    reader.readAsDataURL(file);
+                    uploadedImages.push({
+                        src: null,
+                        name: file.name.toLowerCase(),
+                        isFake: file.name.toLowerCase().includes('whatsapp.jpeg')
+                    });
+                }
+            });
+
+            updateUI();
+        }
+
+        function addImagePreview(src, filename) {
+            const grid = document.getElementById('gridContainer');
+            const index = uploadedImages.length - 1;
+            uploadedImages[index].src = src;
+            
+            const div = document.createElement('div');
+            div.className = 'image-card relative bg-white rounded-2xl overflow-hidden border border-gray-200 group';
+            div.innerHTML = `
+                <img src="${src}" class="w-full h-full object-cover" alt="Upload">
+                <div class="filename-label">${filename}</div>
+                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button onclick="removeImage(${index})" class="w-10 h-10 bg-white rounded-full text-red-500 hover:bg-red-50 flex items-center justify-center">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            grid.appendChild(div);
+        }
+
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            refreshGrid();
+            updateUI();
+        }
+
+        function refreshGrid() {
+            const grid = document.getElementById('gridContainer');
+            grid.innerHTML = '';
+            uploadedImages.forEach((img, i) => {
+                const div = document.createElement('div');
+                div.className = 'image-card relative bg-white rounded-2xl overflow-hidden border border-gray-200 group';
+                div.innerHTML = `
+                    <img src="${img.src}" class="w-full h-full object-cover" alt="Upload">
+                    <div class="filename-label">${img.name}</div>
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button onclick="removeImage(${i})" class="w-10 h-10 bg-white rounded-full text-red-500 hover:bg-red-50 flex items-center justify-center">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function clearAll() {
+            uploadedImages = [];
+            document.getElementById('gridContainer').innerHTML = '';
+            updateUI();
+            document.getElementById('resultsPanel').classList.add('hidden');
+            document.getElementById('criticalAlert').classList.add('hidden');
+        }
+
+        function updateUI() {
+            if (uploadedImages.length > 0) {
+                emptyState.classList.add('hidden');
+                imageGrid.classList.remove('hidden');
+                chatArea.classList.remove('hidden');
+                analyzeBtn.disabled = false;
+            } else {
+                emptyState.classList.remove('hidden');
+                imageGrid.classList.add('hidden');
+                chatArea.classList.add('hidden');
+                analyzeBtn.disabled = true;
+            }
+        }
+
+        function startAnalysis() {
+            const btn = document.getElementById('analyzeBtn');
+            const status = document.getElementById('analysisStatus');
+            const results = document.getElementById('resultsPanel');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Analyzing...';
+            btn.disabled = true;
+            status.classList.remove('hidden');
+            results.classList.add('hidden');
+            document.getElementById('criticalAlert').classList.add('hidden');
+            
+            const hasFake = uploadedImages.some(img => img.isFake);
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = `${progress}%`;
+                progressPercent.textContent = `${Math.round(progress)}%`;
+                
+                if (progress === 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        showResults(hasFake);
+                    }, 500);
+                }
+            }, 200);
+        }
+
+        function showResults(isFake) {
+            const status = document.getElementById('analysisStatus');
+            const results = document.getElementById('resultsPanel');
+            const btn = document.getElementById('analyzeBtn');
+            const scoreCircle = document.getElementById('scoreCircle');
+            const scoreText = document.getElementById('scoreText');
+            const verdictBadge = document.getElementById('verdictBadge');
+            const verdictDesc = document.getElementById('verdictDesc');
+            const safetyBadge = document.getElementById('safetyBadge');
+            const actionContent = document.getElementById('actionContent');
+            const verdictCard = document.getElementById('verdictCard');
+            const findingsList = document.getElementById('findingsList');
+            
+            status.classList.add('hidden');
+            results.classList.remove('hidden');
+            
+            if (isFake) {
+                // FAKE PRODUCT UI
+                document.getElementById('criticalAlert').classList.remove('hidden');
+                
+                scoreCircle.setAttribute('class', 'text-red-500');
+                scoreCircle.setAttribute('stroke-dasharray', '20, 100');
+                scoreText.textContent = '20%';
+                scoreText.className = 'absolute text-xl font-bold text-red-600';
+                
+                verdictBadge.className = 'flex items-center gap-2 text-red-600 font-bold text-lg mb-1';
+                verdictBadge.innerHTML = '<i class="fas fa-times-circle text-2xl"></i><span>Counterfeit Detected</span>';
+                
+                verdictDesc.textContent = 'Multiple authenticity markers failed verification.';
+                verdictDesc.className = 'text-red-600 font-medium';
+                
+                safetyBadge.classList.remove('hidden');
+                verdictCard.classList.add('border-red-200', 'bg-red-50');
+                
+                findingsList.innerHTML = `
+                    <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                        <i class="fas fa-times-circle text-red-600 mt-0.5"></i>
+                        <div>
+                            <p class="font-medium text-sm text-red-900">Invalid Batch Code</p>
+                            <p class="text-xs text-red-700">Batch number not found in manufacturer database</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                        <i class="fas fa-times-circle text-red-600 mt-0.5"></i>
+                        <div>
+                            <p class="font-medium text-sm text-red-900">Fake Hologram</p>
+                            <p class="text-xs text-red-700">Security sticker lacks authentication features</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-yellow-50 rounded-xl">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 mt-0.5"></i>
+                        <div>
+                            <p class="font-medium text-sm text-yellow-900">Poor Print Quality</p>
+                            <p class="text-xs text-yellow-700">Logo pixelation and color mismatch detected</p>
+                        </div>
+                    </div>
+                `;
+                
+                actionContent.innerHTML = `
+                    <div class="bg-red-100 border-l-4 border-red-500 p-4 rounded mb-4">
+                        <p class="text-sm text-red-800 font-bold mb-2">⚠️ Health Risk Warning</p>
+                        <p class="text-xs text-red-700 mb-3">Counterfeit cosmetics may contain dangerous chemicals like lead, mercury, or arsenic.</p>
+                    </div>
+                    <button class="w-full bg-red-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors mb-2">
+                        <i class="fas fa-ban mr-2"></i>Report This Seller
+                    </button>
+                    <button class="w-full bg-white border-2 border-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors">
+                        <i class="fas fa-file-alt mr-2"></i>Generate Complaint Report
+                    </button>
+                `;
+                
+                addBotMessage("🚨 URGENT: This product has been identified as COUNTERFEIT. The batch code is invalid and the hologram shows signs of tampering. Do not use this product on your skin. I've prepared a report you can use to file a complaint.");
+                
+            } else {
+                // GENUINE PRODUCT UI
+                scoreCircle.setAttribute('class', 'text-green-500');
+                scoreCircle.setAttribute('stroke-dasharray', '92, 100');
+                scoreText.textContent = '92%';
+                scoreText.className = 'absolute text-xl font-bold text-green-600';
+                
+                verdictBadge.className = 'flex items-center gap-2 text-green-600 font-bold text-lg mb-1';
+                verdictBadge.innerHTML = '<i class="fas fa-check-circle text-2xl"></i><span>Authentic Product</span>';
+                
+                verdictDesc.textContent = 'All authenticity markers verified successfully.';
+                verdictDesc.className = 'text-gray-600';
+                
+                safetyBadge.classList.add('hidden');
+                verdictCard.classList.remove('border-red-200', 'bg-red-50');
+                
+                findingsList.innerHTML = `
+                    <div class="flex items-start gap-3 p-3 bg-green-50 rounded-xl">
+                        <i class="fas fa-check text-green-600 mt-0.5"></i>
+                        <div>
+                            <p class="font-medium text-sm text-green-900">Valid Batch Code</p>
+                            <p class="text-xs text-green-700">Matches manufacturer database</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-green-50 rounded-xl">
+                        <i class="fas fa-check text-green-600 mt-0.5"></i>
+                        <div>
+                            <p class="font-medium text-sm text-green-900">Authentic Hologram</p>
+                            <p class="text-xs text-green-700">Security features verified</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-xl">
+                        <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
+                        <div>
+                            <p class="font-medium text-sm text-blue-900">Packaging Quality</p>
+                            <p class="text-xs text-blue-700">Print and materials match standards</p>
+                        </div>
+                    </div>
+                `;
+                
+                actionContent.innerHTML = `
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-4">
+                        <p class="text-sm text-green-800 font-bold mb-1">✓ Safe to Use</p>
+                        <p class="text-xs text-green-700">This product has passed all authenticity checks.</p>
+                    </div>
+                    <button class="w-full bg-black text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors mb-2">
+                        <i class="fas fa-download mr-2"></i>Download Certificate
+                    </button>
+                    <button class="w-full bg-white border-2 border-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors">
+                        <i class="fas fa-share-alt mr-2"></i>Share Results
+                    </button>
+                `;
+                
+                addBotMessage("Great news! Your product appears to be AUTHENTIC. The batch code checks out, the hologram is genuine, and the packaging quality matches manufacturer standards. You can safely use this product.");
+            }
+            
+            btn.innerHTML = '<i class="fas fa-redo"></i> Analyze Again';
+            btn.disabled = false;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addUserMessage(text);
+            input.value = '';
+
+            setTimeout(() => {
+                const responses = [
+                    "I can help you understand these results better. The AI analyzes batch codes, holograms, and packaging quality.",
+                    "Based on the analysis, would you like me to generate a detailed authenticity certificate?",
+                    "If you have concerns about these results, I recommend contacting the brand's official customer service for verification.",
+                    "Remember: While our AI is 94% accurate, final confirmation should always come from the manufacturer for high-value items."
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addBotMessage(randomResponse);
+            }, 1000);
+        }
+
+        function addUserMessage(text) {
+            const chatArea = document.getElementById('chatArea');
+            const div = document.createElement('div');
+            div.className = 'flex gap-3 justify-end';
+            div.innerHTML = `
+                <div class="chat-message bg-black text-white rounded-2xl rounded-tr-none px-4 py-3 max-w-[80%]">
+                    <p class="text-sm">${text}</p>
+                </div>
+                <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold">
+                    You
+                </div>
+            `;
+            chatArea.appendChild(div);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function addBotMessage(text) {
+            const chatArea = document.getElementById('chatArea');
+            const div = document.createElement('div');
+            div.className = 'flex gap-3';
+            div.innerHTML = `
+                <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center shrink-0">
+                    <i class="fas fa-robot text-white text-xs"></i>
+                </div>
+                <div class="chat-message bg-gray-100 rounded-2xl rounded-tl-none px-4 py-3 max-w-[80%]">
+                    <p class="text-sm text-gray-800">${text}</p>
+                </div>
+            `;
+            chatArea.appendChild(div);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

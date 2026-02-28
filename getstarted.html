@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Started - ScanSure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        
+        .input-group:focus-within label {
+            color: #000;
+        }
+        
+        .input-group:focus-within i {
+            color: #000;
+        }
+        
+        /* Gradient Text */
+        .text-gradient { 
+            background: linear-gradient(to right, #f43f5e, #9333ea); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        
+        /* Custom Checkbox */
+        .custom-checkbox:checked {
+            background-color: #000;
+            border-color: #000;
+        }
+        
+        /* Google Button Hover Effect */
+        .google-btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        
+        /* Input Autofill Styling */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0px 1000px white inset;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <a href="#" class="flex items-center gap-2 hover:scale-105 transition-transform">
+                    <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                        <i class="fas fa-sparkles text-white text-lg"></i>
+                    </div>
+                    <span class="text-2xl font-bold tracking-tight">ScanSure</span>
+                </a>
+
+                <!-- Back to Home -->
+                <a href="#" class="text-sm font-medium text-gray-600 hover:text-black transition-colors flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex items-center justify-center pt-20 pb-10 px-4 sm:px-6">
+        <div class="w-full max-w-md">
+            
+            <!-- Header Text -->
+            <div class="text-center mb-8 opacity-0 animate-fade-in-up">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+                    Create your account
+                </h1>
+                <p class="text-gray-600">
+                    Join 50,000+ users protecting their beauty
+                </p>
+            </div>
+
+            <!-- Form Card -->
+            <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 opacity-0 animate-fade-in-up delay-100">
+
+                <!-- Form -->
+                <form id="signupForm" class="space-y-5" onsubmit="event.preventDefault();">
+                    
+                    <!-- Email Input -->
+                    <div class="input-group opacity-0 animate-fade-in delay-200">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">
+                            Email Address
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400 transition-colors"></i>
+                            </div>
+                            <input 
+                                type="email" 
+                                id="email"
+                                class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-black focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-400"
+                                placeholder="you@example.com"
+                                required
+                            >
+                        </div>
+                        <p id="emailError" class="hidden text-red-500 text-xs mt-1 ml-1">Please enter a valid email address</p>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="input-group opacity-0 animate-fade-in delay-300">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">
+                            Password
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400 transition-colors"></i>
+                            </div>
+                            <input 
+                                type="password" 
+                                id="password"
+                                class="w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-black focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-400"
+                                placeholder="••••••••"
+                                required
+                            >
+                            <button 
+                                type="button"
+                                onclick="togglePassword('password', 'eyeIcon1')"
+                                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+                            >
+                                <i id="eyeIcon1" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1 ml-1">Must be at least 8 characters</p>
+                    </div>
+
+                    <!-- Confirm Password Input -->
+                    <div class="input-group opacity-0 animate-fade-in delay-300">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">
+                            Confirm Password
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400 transition-colors"></i>
+                            </div>
+                            <input 
+                                type="password" 
+                                id="confirmPassword"
+                                class="w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-black focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-400"
+                                placeholder="••••••••"
+                                required
+                            >
+                            <button 
+                                type="button"
+                                onclick="togglePassword('confirmPassword', 'eyeIcon2')"
+                                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+                            >
+                                <i id="eyeIcon2" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <p id="passwordError" class="hidden text-red-500 text-xs mt-1 ml-1">Passwords do not match</p>
+                    </div>
+
+                    <!-- Terms Checkbox -->
+                    <div class="flex items-start gap-3 opacity-0 animate-fade-in delay-300">
+                        <input 
+                            type="checkbox" 
+                            id="terms" 
+                            class="custom-checkbox w-5 h-5 rounded border-2 border-gray-300 text-black focus:ring-black focus:ring-offset-0 mt-0.5 cursor-pointer"
+                            required
+                        >
+                        <label for="terms" class="text-sm text-gray-600 leading-relaxed cursor-pointer select-none">
+                            I agree to the <a href="#" class="text-black font-semibold underline hover:no-underline">Terms of Service</a> and <a href="#" class="text-black font-semibold underline hover:no-underline">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        id="submitBtn"
+                        class="w-full bg-black text-white font-semibold py-4 rounded-full hover:bg-gray-800 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl opacity-0 animate-fade-in delay-300"
+                    >
+                        <span>Create Account</span>
+                        <i class="fas fa-arrow-right text-sm"></i>
+                    </button>
+                </form>
+
+                
+                <!-- Divider -->
+                <div class="relative mb-6 mt-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-white text-gray-500 font-medium">Or continue with Google</span>
+                    </div>
+                </div>
+                 
+                <!-- Google Sign In Button -->
+                <button class="google-btn w-full bg-white border-2 border-gray-200 text-gray-700 font-medium py-3.5 px-4 rounded-full flex items-center justify-center gap-3 hover:border-gray-400 transition-all duration-200 mb-6 group">
+                    <svg class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Continue with Google
+                </button>
+
+
+                <!-- Login Link -->
+                <div class="mt-8 text-center opacity-0 animate-fade-in delay-300">
+                    <p class="text-gray-600 text-sm">
+                        Already have an account? 
+                        <a href="#" class="font-semibold text-black hover:text-gray-700 ml-1 underline-offset-4 hover:underline transition-all">
+                            Log in
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="mt-8 flex flex-wrap justify-center gap-6 text-xs text-gray-500 opacity-0 animate-fade-in delay-400">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-shield-alt text-green-500"></i>
+                    <span>SSL Secure</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-lock text-gray-400"></i>
+                    <span>Encrypted Data</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-check-circle text-blue-500"></i>
+                    <span>Verified Platform</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="bg-white border-t border-gray-100 py-6 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+            <p>© 2026 ScanSure. All rights reserved.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-black transition-colors">Privacy</a>
+                <a href="#" class="hover:text-black transition-colors">Terms</a>
+                <a href="#" class="hover:text-black transition-colors">Help</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Password Visibility Toggle
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Form Validation
+        const form = document.getElementById('signupForm');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Real-time validation
+        email.addEventListener('blur', () => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email.value && !emailRegex.test(email.value)) {
+                emailError.classList.remove('hidden');
+                email.classList.add('border-red-500');
+                email.classList.remove('border-gray-200');
+            } else {
+                emailError.classList.add('hidden');
+                email.classList.remove('border-red-500');
+                email.classList.add('border-gray-200');
+            }
+        });
+
+        confirmPassword.addEventListener('input', () => {
+            if (confirmPassword.value && password.value !== confirmPassword.value) {
+                passwordError.classList.remove('hidden');
+                confirmPassword.classList.add('border-red-500');
+                confirmPassword.classList.remove('border-gray-200');
+            } else {
+                passwordError.classList.add('hidden');
+                confirmPassword.classList.remove('border-red-500');
+                confirmPassword.classList.add('border-gray-200');
+            }
+        });
+
+        // Form Submit Handler
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Validate all fields
+            let isValid = true;
+            
+            if (password.value !== confirmPassword.value) {
+                passwordError.classList.remove('hidden');
+                confirmPassword.classList.add('border-red-500');
+                isValid = false;
+            }
+            
+            if (password.value.length < 8) {
+                alert('Password must be at least 8 characters long');
+                isValid = false;
+            }
+            
+            if (isValid) {
+                // Simulate loading state
+                const originalContent = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Creating account...';
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                
+                // Simulate API call
+                setTimeout(() => {
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Account created!';
+                    submitBtn.classList.remove('bg-black');
+                    submitBtn.classList.add('bg-green-600');
+                    
+                    setTimeout(() => {
+                        // Reset or redirect
+                        alert('Account created successfully! Redirecting to verification...');
+                        submitBtn.innerHTML = originalContent;
+                        submitBtn.disabled = false;
+                        window.location.href = 'tool.html';
+                        submitBtn.classList.remove('opacity-75', 'cursor-not-allowed', 'bg-green-600');
+                        submitBtn.classList.add('bg-black');
+                    }, 1000);
+                }, 2000);
+            }
+        });
+
+        // Input Focus Effects
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.parentElement.classList.add('scale-[1.02]');
+                input.parentElement.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', () => {
+                input.parentElement.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Remove animations on load to trigger them
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.opacity-0').forEach(el => {
+                el.style.opacity = '1';
+            });
+        });
+    </script>
+</body>
+</html>
